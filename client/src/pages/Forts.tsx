@@ -78,17 +78,34 @@ export default function Forts() {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredForts?.map((fort, idx) => (
-            <motion.div 
-              key={fort.id}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: Math.min(idx * 0.05, 0.5) }}
-            >
-              <FortCard fort={fort} />
-            </motion.div>
-          ))}
+        <div className="space-y-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredForts?.map((fort, idx) => (
+              <motion.div 
+                key={fort.id}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: Math.min(idx * 0.05, 0.5) }}
+              >
+                <FortCard fort={fort} />
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Native Ad Placement */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="bg-primary/5 rounded-3xl p-8 border-2 border-dashed border-primary/20 flex flex-col items-center justify-center text-center space-y-4"
+          >
+            <div className="text-xs font-bold uppercase tracking-widest text-primary/60">Exclusive Discovery</div>
+            <h3 className="text-2xl font-serif font-bold">Want to explore hidden artilleries?</h3>
+            <p className="text-muted-foreground max-w-md">Watch a quick 30-second historical showcase to support our heritage project and unlock detailed specs of Maratha cannons and weaponry.</p>
+            <button className="px-8 py-3 bg-primary text-primary-foreground rounded-xl font-medium hover:bg-primary/90 transition-all shadow-lg hover:shadow-primary/20">
+              Watch Video & Unlock
+            </button>
+          </motion.div>
         </div>
       )}
     </div>

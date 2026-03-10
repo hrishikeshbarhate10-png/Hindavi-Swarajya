@@ -41,11 +41,29 @@ export const timelineEvents = pgTable("timeline_events", {
   imageUrl: text("image_url"),
 });
 
+export const battleStories = pgTable("battle_stories", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  content: text("content").notNull(),
+  imageUrl: text("image_url"),
+});
+
+export const quizQuestions = pgTable("quiz_questions", {
+  id: serial("id").primaryKey(),
+  question: text("question").notNull(),
+  options: text("options").array().notNull(),
+  correctAnswer: text("correct_answer").notNull(),
+  explanation: text("explanation"),
+});
+
 // === BASE SCHEMAS ===
 export const insertFortSchema = createInsertSchema(forts).omit({ id: true });
 export const insertFortImageSchema = createInsertSchema(fortImages).omit({ id: true });
 export const insertArtifactSchema = createInsertSchema(artifacts).omit({ id: true });
 export const insertTimelineEventSchema = createInsertSchema(timelineEvents).omit({ id: true });
+export const insertBattleStorySchema = createInsertSchema(battleStories).omit({ id: true });
+export const insertQuizQuestionSchema = createInsertSchema(quizQuestions).omit({ id: true });
 
 // === EXPLICIT API CONTRACT TYPES ===
 
@@ -61,7 +79,14 @@ export type InsertArtifact = z.infer<typeof insertArtifactSchema>;
 export type TimelineEvent = typeof timelineEvents.$inferSelect;
 export type InsertTimelineEvent = z.infer<typeof insertTimelineEventSchema>;
 
+export type BattleStory = typeof battleStories.$inferSelect;
+export type InsertBattleStory = z.infer<typeof insertBattleStorySchema>;
+
+export type QuizQuestion = typeof quizQuestions.$inferSelect;
+export type InsertQuizQuestion = z.infer<typeof insertQuizQuestionSchema>;
+
 export type FortResponse = Fort & { images: FortImage[] };
 export type FortsListResponse = Fort[];
 export type ArtifactsListResponse = Artifact[];
 export type TimelineListResponse = TimelineEvent[];
+export type BattleStoriesListResponse = BattleStory[];

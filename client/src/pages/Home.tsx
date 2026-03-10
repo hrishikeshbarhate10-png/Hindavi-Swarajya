@@ -1,13 +1,23 @@
 import { Link } from "wouter";
-import { Search, Map, ArrowRight } from "lucide-react";
+import { Search, Map, ArrowRight, Sword, Trophy, Play } from "lucide-react";
 import { useForts } from "@/hooks/use-forts";
 import { FortCard } from "@/components/ui/FortCard";
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { useStories } from "@/hooks/use-stories";
+import { useDailyQuiz } from "@/hooks/use-quiz";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const { data: forts, isLoading } = useForts();
+  const { data: stories } = useStories();
+  const { data: quiz } = useDailyQuiz();
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [showResult, setShowResult] = useState(false);
 
   const featuredForts = forts?.slice(0, 3) || [];
   const sahyadriForts = forts?.filter(f => f.region.toLowerCase().includes('sahyadri')).slice(0, 4) || [];
@@ -60,6 +70,87 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Battle Stories & Quiz Grid */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Battle Stories */}
+        <div className="space-y-6">
+          <div className="flex items-center gap-3">
+            <Sword className="w-6 h-6 text-primary" />
+            <h2 className="text-3xl font-serif font-bold">Battle Stories</h2>
+          </div>
+          <div className="grid gap-4">
+            {stories?.map((story) => (
+              <Card key={story.id} className="overflow-hidden hover-elevate group">
+                <div className="flex h-32">
+                  <div className="w-1/3 relative">
+                    <img src={story.imageUrl || ""} alt={story.title} className="absolute inset-0 w-full h-full object-cover" />
+                  </div>
+                  <div className="w-2/3 p-4 flex flex-col justify-between">
+                    <div>
+                      <h3 className="font-bold text-lg">{story.title}</h3>
+                      <p className="text-sm text-muted-foreground line-clamp-2">{story.description}</p>
+                    </div>
+                    <Button variant="link" className="p-0 h-auto self-start text-primary">
+                      Read Story <ArrowRight className="ml-1 w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Quiz of the Day */}
+        <div className="space-y-6">
+          <div className="flex items-center gap-3">
+            <Trophy className="w-6 h-6 text-primary" />
+            <h2 className="text-3xl font-serif font-bold">Quiz of the Day</h2>
+          </div>
+          {quiz && (
+            <Card className="p-6 border-2 border-primary/20 bg-primary/5">
+              <h3 className="text-xl font-bold mb-4">{quiz.question}</h3>
+              {!showResult ? (
+                <div className="space-y-4">
+                  <RadioGroup onValueChange={setSelectedOption} value={selectedOption || ""}>
+                    {quiz.options.map((option) => (
+                      <div key={option} className="flex items-center space-x-2 bg-background p-3 rounded-lg border">
+                        <RadioGroupItem value={option} id={option} />
+                        <Label htmlFor={option} className="flex-1 cursor-pointer">{option}</Label>
+                      </div>
+                    ))}
+                  </RadioGroup>
+                  <Button 
+                    className="w-full" 
+                    disabled={!selectedOption}
+                    onClick={() => setShowResult(true)}
+                  >
+                    Submit Answer
+                  </Button>
+                </div>
+              ) : (
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="text-center space-y-4"
+                >
+                  <div className={`p-4 rounded-xl ${selectedOption === quiz.correctAnswer ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                    {selectedOption === quiz.correctAnswer ? (
+                      <p className="font-bold">Correct! Jai Bhavani!</p>
+                    ) : (
+                      <p className="font-bold">Incorrect. The correct answer is {quiz.correctAnswer}.</p>
+                    )}
+                  </div>
+                  <p className="text-muted-foreground">{quiz.explanation}</p>
+                  <Button variant="outline" onClick={() => { setShowResult(false); setSelectedOption(null); }}>
+                    Try Another
+                  </Button>
+                </motion.div>
+              )}
+            </Card>
+          )}
+        </div>
+      </section>
+
       {/* Featured Section */}
       <section>
         <div className="flex items-end justify-between mb-6">
@@ -93,6 +184,20 @@ export default function Home() {
             ))}
           </div>
         )}
+      </section>
+
+      {/* Ads/Reward Section */}
+      <section className="bg-primary/10 rounded-3xl p-8 border border-primary/20 text-center space-y-4">
+        <div className="flex flex-col items-center">
+          <Play className="w-12 h-12 text-primary mb-4" />
+          <h2 className="text-2xl font-bold font-serif">Support the Legacy</h2>
+          <p className="text-muted-foreground max-w-md mx-auto">
+            Watch a short video to unlock detailed technical layouts of artillery used in Maratha warfare.
+          </p>
+          <Button className="mt-4 bg-primary hover:bg-primary/90">
+            Watch Ad to Unlock Artilleries
+          </Button>
+        </div>
       </section>
 
       {/* Region Section */}

@@ -60,6 +60,24 @@ export const api = {
       },
     },
   },
+  stories: {
+    list: {
+      method: 'GET' as const,
+      path: '/api/stories' as const,
+      responses: {
+        200: z.array(z.custom<any>()), // BattleStory
+      },
+    },
+  },
+  quiz: {
+    daily: {
+      method: 'GET' as const,
+      path: '/api/quiz/daily' as const,
+      responses: {
+        200: z.custom<any>(), // QuizQuestion
+      },
+    },
+  },
 };
 
 export function buildUrl(path: string, params?: Record<string, string | number>): string {

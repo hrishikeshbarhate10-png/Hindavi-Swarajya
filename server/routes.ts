@@ -39,6 +39,17 @@ export async function registerRoutes(
     res.json(results);
   });
 
+  app.get(api.stories.list.path, async (req, res) => {
+    const results = await storage.getBattleStories();
+    res.json(results);
+  });
+
+  app.get(api.quiz.daily.path, async (req, res) => {
+    const quiz = await storage.getDailyQuiz();
+    if (!quiz) return res.status(404).json({ message: "No quiz found" });
+    res.json(quiz);
+  });
+
   // Seed DB on start
   await seedDatabase();
 
@@ -116,6 +127,30 @@ async function seedDatabase() {
       { year: 1659, title: "Battle of Pratapgad", description: "Shivaji Maharaj defeated Afzal Khan at Pratapgad.", imageUrl: null },
       { year: 1674, title: "Coronation at Raigad", description: "Shivaji Maharaj was crowned as the Chhatrapati (Emperor) of the Maratha Empire.", imageUrl: "https://images.unsplash.com/photo-1596489370043-424a101b0b5e" },
       { year: 1680, title: "Legacy of the Maratha Empire", description: "Chhatrapati Shivaji Maharaj passed away, but his legacy continued to expand the empire.", imageUrl: null },
+    ]);
+
+    await db.insert(battleStories).values([
+      {
+        title: "Battle of Pratapgad",
+        description: "How Shivaji Maharaj defeated Afzal Khan.",
+        content: "In 1659, the Bijapur Sultanate sent Afzal Khan to subdue Shivaji Maharaj. The two met at the foot of Pratapgad fort for a parley. Sensing treachery, Shivaji wore chain mail under his clothes and hidden weapons. When Afzal Khan tried to stab him, Shivaji used his 'Wagh Nakh' (tiger claws) to defeat the giant general. This victory established the Marathas as a major power.",
+        imageUrl: "https://images.unsplash.com/photo-1600100397608-f010f41cb822"
+      }
+    ]);
+
+    await db.insert(quizQuestions).values([
+      {
+        question: "Which fort was Shivaji Maharaj’s capital?",
+        options: ["Raigad", "Torna", "Sinhagad"],
+        correctAnswer: "Raigad",
+        explanation: "Raigad was made the capital of the Maratha Empire in 1674 during Shivaji Maharaj's coronation."
+      },
+      {
+        question: "What was the name of Shivaji Maharaj's sword?",
+        options: ["Bhavani", "Jagadamba", "Both"],
+        correctAnswer: "Both",
+        explanation: "Shivaji Maharaj had multiple swords, including the famous Bhavani and Jagadamba talwars."
+      }
     ]);
   }
 }

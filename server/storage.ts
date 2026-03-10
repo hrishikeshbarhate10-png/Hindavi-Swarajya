@@ -1,12 +1,14 @@
 import { db } from "./db";
-import { forts, fortImages, artifacts, timelineEvents, type Fort, type FortImage, type Artifact, type TimelineEvent } from "@shared/schema";
-import { eq, ilike, or } from "drizzle-orm";
+import { forts, fortImages, artifacts, timelineEvents, battleStories, quizQuestions, type Fort, type FortImage, type Artifact, type TimelineEvent, type BattleStory, type QuizQuestion } from "@shared/schema";
+import { eq, ilike, or, sql } from "drizzle-orm";
 
 export interface IStorage {
   getForts(search?: string, region?: string): Promise<Fort[]>;
   getFort(id: number): Promise<(Fort & { images: FortImage[] }) | undefined>;
   getArtifacts(): Promise<Artifact[]>;
   getTimelineEvents(): Promise<TimelineEvent[]>;
+  getBattleStories(): Promise<BattleStory[]>;
+  getDailyQuiz(): Promise<QuizQuestion | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -34,6 +36,15 @@ export class DatabaseStorage implements IStorage {
 
   async getTimelineEvents(): Promise<TimelineEvent[]> {
     return await db.select().from(timelineEvents).orderBy(timelineEvents.year);
+  }
+
+  async getBattleStories(): Promise<BattleStory[]> {
+    return await db.select().from(battleStories);
+  }
+
+  async getDailyQuiz(): Promise<QuizQuestion | undefined> {
+    const [quiz] = await db.select().from(quizQuestions).orderBy(sql`RANDOM()`).limit(1);
+    return quiz;
   }
 }
 
