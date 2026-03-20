@@ -1,0 +1,110 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-sans: 'DM Sans', sans-serif;
+    --font-serif: 'Playfair Display', serif;
+
+    /* Maratha Heritage Theme: Light */
+    --background: 44 38% 93%; /* Off-White #F5F1E6 */
+    --foreground: 32 28% 23%; /* Dark Brown #4A3B2A */
+
+    --card: 0 0% 100%;
+    --card-foreground: 32 28% 23%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 32 28% 23%;
+
+    --primary: 25 100% 50%; /* Saffron #FF6B00 */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 45 68% 47%; /* Antique Gold #C9A227 */
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 44 20% 85%;
+    --muted-foreground: 32 20% 45%;
+
+    --accent: 45 68% 47%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 32 15% 85%;
+    --input: 32 15% 85%;
+    --ring: 25 100% 50%;
+
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    /* Maratha Heritage Theme: Dark */
+    --background: 32 28% 12%; /* Very Dark Brown */
+    --foreground: 44 38% 93%; /* Off-White */
+
+    --card: 32 28% 18%;
+    --card-foreground: 44 38% 93%;
+
+    --popover: 32 28% 18%;
+    --popover-foreground: 44 38% 93%;
+
+    --primary: 25 100% 50%; /* Saffron #FF6B00 */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 45 68% 47%; /* Antique Gold #C9A227 */
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 32 20% 25%;
+    --muted-foreground: 44 20% 75%;
+
+    --accent: 45 68% 47%;
+    --accent-foreground: 0 0% 100%;
+
+    --border: 32 20% 25%;
+    --input: 32 20% 25%;
+    --ring: 25 100% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary;
+    font-family: var(--font-sans);
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-serif);
+    @apply tracking-tight;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .glass-panel {
+    @apply bg-background/80 backdrop-blur-lg border-b border-border/50 supports-[backdrop-filter]:bg-background/60;
+  }
+}
+
+/* Custom Scrollbar for a premium feel */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-primary/20 rounded-full;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-primary/40;
+}
