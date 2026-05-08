@@ -1,6 +1,12 @@
-import { db } from "./db";
-import { forts, fortImages, artifacts, timelineEvents, battleStories, quizQuestions, type Fort, type FortImage, type Artifact, type TimelineEvent, type BattleStory, type QuizQuestion } from "@shared/schema";
-import { eq, ilike, or, sql } from "drizzle-orm";
+import type { Fort, FortImage, Artifact, TimelineEvent, BattleStory, QuizQuestion } from "@shared/schema";
+import { PostgresAdapter } from "./adapters/postgres";
+
+// ─── Storage Interface ────────────────────────────────────────────────────────
+// This is the single contract all database adapters must implement.
+// To add a new database (Oracle, MySQL, etc.):
+//   1. Create server/adapters/your-db.ts implementing IStorage
+//   2. Import it below and add a case in the factory switch
+//   3. Set DB_ADAPTER=your-db in your environment variables
 
 export interface IStorage {
   getForts(search?: string, region?: string): Promise<Fort[]>;
@@ -11,41 +17,31 @@ export interface IStorage {
   getDailyQuiz(): Promise<QuizQuestion | undefined>;
 }
 
-export class DatabaseStorage implements IStorage {
-  async getForts(search?: string, region?: string): Promise<Fort[]> {
-    let query = db.select().from(forts).$dynamic();
-    if (region) {
-      query = query.where(ilike(forts.region, `%${region}%`));
-    }
-    if (search) {
-      query = query.where(or(ilike(forts.name, `%${search}%`), ilike(forts.location, `%${search}%`)));
-    }
-    return await query;
-  }
+// ─── Adapter Factory ──────────────────────────────────────────────────────────
+// Set DB_ADAPTER env var to switch databases:
+//   DB_ADAPTER=postgres  → PostgreSQL / Supabase (default)
+//   DB_ADAPTER=oracle    → add server/adapters/oracle.ts, import & register below
+//   DB_ADAPTER=mysql     → add server/adapters/mysql.ts, import & register below
 
-  async getFort(id: number): Promise<(Fort & { images: FortImage[] }) | undefined> {
-    const [fort] = await db.select().from(forts).where(eq(forts.id, id));
-    if (!fort) return undefined;
-    const images = await db.select().from(fortImages).where(eq(fortImages.fortId, id));
-    return { ...fort, images };
-  }
+function createStorage(): IStorage {
+  const adapter = (process.env.DB_ADAPTER || "postgres").toLowerCase();
 
-  async getArtifacts(): Promise<Artifact[]> {
-    return await db.select().from(artifacts);
-  }
+  switch (adapter) {
+    case "postgres":
+    case "supabase":
+      return new PostgresAdapter();
 
-  async getTimelineEvents(): Promise<TimelineEvent[]> {
-    return await db.select().from(timelineEvents).orderBy(timelineEvents.year);
-  }
+    // To add Oracle:
+    // case "oracle":
+    //   return new OracleAdapter();   // import OracleAdapter from "./adapters/oracle"
 
-  async getBattleStories(): Promise<BattleStory[]> {
-    return await db.select().from(battleStories);
-  }
+    // To add MySQL:
+    // case "mysql":
+    //   return new MySQLAdapter();    // import MySQLAdapter from "./adapters/mysql"
 
-  async getDailyQuiz(): Promise<QuizQuestion | undefined> {
-    const [quiz] = await db.select().from(quizQuestions).orderBy(sql`RANDOM()`).limit(1);
-    return quiz;
+    default:
+      throw new Error(`Unknown DB_ADAPTER: "${adapter}". Supported: postgres, supabase`);
   }
 }
 
-export const storage = new DatabaseStorage();
+export const storage: IStorage = createStorage();
