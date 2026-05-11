@@ -1,4 +1,4 @@
-package com.getcapacitor.myapp;
+package com.hindavi.swarajya;
 
 import static org.junit.Assert.*;
 
