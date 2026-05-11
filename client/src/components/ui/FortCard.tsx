@@ -38,6 +38,7 @@ export function FortCard({ fort, className }: FortCardProps) {
             e.stopPropagation();
             toggleFavorite(fort.id);
           }}
+          data-testid={`button-favorite-${fort.id}`}
           className="absolute top-4 right-4 z-20 p-2 rounded-full bg-black/20 backdrop-blur-md border border-white/10 text-white hover:bg-black/40 transition-colors"
           aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
         >

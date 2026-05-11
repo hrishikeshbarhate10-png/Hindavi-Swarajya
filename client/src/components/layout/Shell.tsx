@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { Home, Castle, Sword, Clock, Heart } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { useFavorites } from "@/hooks/use-favorites";
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -13,11 +14,13 @@ const navItems = [
   { href: "/forts", label: "Forts", icon: Castle },
   { href: "/artifacts", label: "Artifacts", icon: Sword },
   { href: "/timeline", label: "Timeline", icon: Clock },
-  { href: "/favorites", label: "Saved", icon: Heart },
+  { href: "/favorites", label: "Saved", icon: Heart, showBadge: true },
 ];
 
 export function Shell({ children }: { children: ReactNode }) {
   const [location] = useLocation();
+  const { favorites } = useFavorites();
+  const savedCount = favorites.length;
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-background">
@@ -34,10 +37,12 @@ export function Shell({ children }: { children: ReactNode }) {
         <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
           {navItems.map((item) => {
             const isActive = location === item.href || (item.href !== "/" && location.startsWith(item.href));
+            const count = item.showBadge ? savedCount : 0;
             return (
               <Link 
                 key={item.href} 
                 href={item.href}
+                data-testid={`nav-link-${item.label.toLowerCase()}`}
                 className={cn(
                   "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-medium",
                   isActive 
@@ -46,7 +51,15 @@ export function Shell({ children }: { children: ReactNode }) {
                 )}
               >
                 <item.icon className={cn("w-5 h-5", isActive ? "text-primary" : "opacity-70")} />
-                {item.label}
+                <span className="flex-1">{item.label}</span>
+                {count > 0 && (
+                  <span
+                    data-testid="favorites-count-badge-sidebar"
+                    className="ml-auto min-w-[20px] h-5 px-1.5 text-xs font-bold rounded-full bg-primary text-primary-foreground flex items-center justify-center"
+                  >
+                    {count}
+                  </span>
+                )}
               </Link>
             );
           })}
@@ -73,20 +86,32 @@ export function Shell({ children }: { children: ReactNode }) {
         <div className="flex justify-around items-center h-16 px-2">
           {navItems.map((item) => {
             const isActive = location === item.href || (item.href !== "/" && location.startsWith(item.href));
+            const count = item.showBadge ? savedCount : 0;
             return (
               <Link 
                 key={item.href} 
                 href={item.href}
+                data-testid={`mobile-nav-link-${item.label.toLowerCase()}`}
                 className={cn(
                   "flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors duration-200",
                   isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
                 )}
               >
-                <div className={cn(
-                  "p-1.5 rounded-full transition-all duration-300",
-                  isActive ? "bg-primary/10" : "bg-transparent"
-                )}>
-                  <item.icon className={cn("w-5 h-5", isActive ? "fill-primary/20" : "")} />
+                <div className="relative">
+                  <div className={cn(
+                    "p-1.5 rounded-full transition-all duration-300",
+                    isActive ? "bg-primary/10" : "bg-transparent"
+                  )}>
+                    <item.icon className={cn("w-5 h-5", isActive ? "fill-primary/20" : "")} />
+                  </div>
+                  {count > 0 && (
+                    <span
+                      data-testid="favorites-count-badge-mobile"
+                      className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 text-[10px] font-bold rounded-full bg-primary text-primary-foreground flex items-center justify-center leading-none"
+                    >
+                      {count}
+                    </span>
+                  )}
                 </div>
                 <span className="text-[10px] font-medium">{item.label}</span>
               </Link>

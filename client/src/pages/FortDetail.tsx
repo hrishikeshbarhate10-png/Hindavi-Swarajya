@@ -51,6 +51,7 @@ export default function FortDetail() {
         
         <button
           onClick={() => toggleFavorite(fort.id)}
+          data-testid="button-favorite-detail"
           className={`inline-flex items-center gap-2 px-5 py-2 rounded-xl font-medium transition-all shadow-sm ${
             favorited 
               ? "bg-primary text-primary-foreground border-transparent" 

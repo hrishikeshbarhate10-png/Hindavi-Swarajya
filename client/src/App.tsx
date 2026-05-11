@@ -7,6 +7,7 @@ import NotFound from "@/pages/not-found";
 
 // Layout
 import { Shell } from "@/components/layout/Shell";
+import { FavoritesProvider } from "@/contexts/favorites-context";
 
 // Pages
 import Home from "@/pages/Home";
@@ -36,8 +37,10 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Router />
+        <FavoritesProvider>
+          <Toaster />
+          <Router />
+        </FavoritesProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );
