@@ -1,0 +1,14 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "PwKyPRUhYuNO7nXIChjT9"
+uri = "file://client/public/icons/icon-512.png"
+type = "image"
+title = "hindavi fort icon 512"
+
+[[generated]]
+id = "23iscMjkCNgikeSOR1jQP"
+uri = "file://client/public/icons/icon-192.png"
+type = "image"
+title = "hindavi fort icon 192"
