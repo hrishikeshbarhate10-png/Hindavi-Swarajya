@@ -33,6 +33,17 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
+
+        <!--
+          AdMob App ID.
+          DEVELOPMENT: Using Google's official test app ID below (safe to commit).
+          PRODUCTION:  Replace the value with your real AdMob Android App ID from
+                       https://admob.google.com — format: ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX
+        -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713"/>
+
     </application>
 
     <!-- Permissions -->

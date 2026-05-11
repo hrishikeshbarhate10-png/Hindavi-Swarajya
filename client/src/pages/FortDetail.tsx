@@ -2,6 +2,7 @@ import { useRoute } from "wouter";
 import { MapPin, Calendar, Compass, ShieldAlert, Heart, ArrowLeft, Image as ImageIcon } from "lucide-react";
 import { useFort } from "@/hooks/use-forts";
 import { useFavorites } from "@/hooks/use-favorites";
+import { AdBanner } from "@/components/ui/AdBanner";
 import { Link } from "wouter";
 import useEmblaCarousel from "embla-carousel-react";
 import { motion } from "framer-motion";
@@ -41,7 +42,7 @@ export default function FortDetail() {
   const images = fort.images?.length > 0 ? fort.images : [{ id: 0, url: fort.imageUrl }];
 
   return (
-    <div className="space-y-8 pb-12">
+    <div className="space-y-8 pb-16">
       {/* Back & Actions */}
       <div className="flex items-center justify-between">
         <Link href="/forts" className="inline-flex items-center gap-2 px-4 py-2 bg-card border rounded-xl hover:bg-muted transition-colors font-medium">
@@ -160,6 +161,8 @@ export default function FortDetail() {
           </div>
         </div>
       </div>
+
+      <AdBanner />
     </div>
   );
 }

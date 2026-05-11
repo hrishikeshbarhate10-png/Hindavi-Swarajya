@@ -72,6 +72,49 @@ In Xcode:
 
 ---
 
+## AdMob Configuration
+
+The app uses `@capacitor-community/admob` to show banner ads on the Forts list and Fort detail screens.
+
+### Development (current)
+
+Google's official test IDs are used so no real ads are loaded during development. Test mode is automatically enabled when running `npm run dev` (`import.meta.env.DEV = true`).
+
+### Production — required steps before publishing
+
+**1. Create your AdMob account and ad units**
+
+Sign in at https://admob.google.com and create:
+- One Android app → note the App ID and create a Banner ad unit
+- One iOS app → note the App ID and create a Banner ad unit
+
+**2. Set environment variables (Replit Secrets panel)**
+
+| Variable | Description |
+|---|---|
+| `VITE_ADMOB_ANDROID_APP_ID` | Your Android AdMob App ID (ca-app-pub-…~…) |
+| `VITE_ADMOB_IOS_APP_ID` | Your iOS AdMob App ID (ca-app-pub-…~…) |
+| `VITE_ADMOB_ANDROID_BANNER_ID` | Your Android banner ad unit ID |
+| `VITE_ADMOB_IOS_BANNER_ID` | Your iOS banner ad unit ID |
+
+**3. Update native manifest files**
+
+Replace the test app IDs with your real ones in:
+
+- `android/app/src/main/AndroidManifest.xml` — the `com.google.android.gms.ads.APPLICATION_ID` meta-data value
+- `ios/App/App/Info.plist` — the `GADApplicationIdentifier` string value
+
+**4. Sync and rebuild**
+
+```
+npx vite build
+npx cap sync
+```
+
+Then open Android Studio / Xcode and build a release. Test mode is off automatically in production builds.
+
+---
+
 ## Database
 
 Supabase (PostgreSQL) is used. Set SUPABASE_DATABASE_URL in Replit environment secrets.

@@ -16,6 +16,15 @@ const config: CapacitorConfig = {
   android: {
     allowMixedContent: false,
   },
+  plugins: {
+    AdMob: {
+      // Test app IDs — replace with real IDs from https://admob.google.com before publishing
+      // Android real app ID goes in AndroidManifest.xml (com.google.android.gms.ads.APPLICATION_ID)
+      // iOS real app ID goes in Info.plist (GADApplicationIdentifier)
+      appIdIos: process.env.VITE_ADMOB_IOS_APP_ID ?? "ca-app-pub-3940256099942544~1458002511",
+      appIdAndroid: process.env.VITE_ADMOB_ANDROID_APP_ID ?? "ca-app-pub-3940256099942544~3347511713",
+    },
+  },
 };
 
 export default config;

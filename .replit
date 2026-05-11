@@ -38,3 +38,11 @@ author = "agent"
 task = "shell.exec"
 args = "npm run dev"
 waitForPort = 5000
+
+[userenv]
+
+[userenv.shared]
+VITE_ADMOB_ANDROID_APP_ID = "ca-app-pub-3940256099942544~3347511713"
+VITE_ADMOB_IOS_APP_ID = "ca-app-pub-3940256099942544~1458002511"
+VITE_ADMOB_ANDROID_BANNER_ID = "ca-app-pub-3940256099942544/6300978111"
+VITE_ADMOB_IOS_BANNER_ID = "ca-app-pub-3940256099942544/2934735716"
