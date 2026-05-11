@@ -27,10 +27,12 @@ export function Shell({ children }: { children: ReactNode }) {
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex flex-col w-64 fixed inset-y-0 left-0 bg-card border-r border-border z-50">
         <div className="p-6">
-          <h1 className="text-2xl font-serif font-bold text-primary tracking-tight flex items-center gap-2">
-            <Castle className="w-8 h-8 text-primary" />
-            <span>Hindavi</span>
-          </h1>
+          <Link href="/" className="block">
+            <h1 className="text-2xl font-serif font-bold text-primary tracking-tight flex items-center gap-2 hover:opacity-80 transition-opacity">
+              <Castle className="w-8 h-8 text-primary" />
+              <span>Hindavi</span>
+            </h1>
+          </Link>
           <p className="text-sm text-muted-foreground mt-1 font-serif italic">The Maratha Heritage</p>
         </div>
         
@@ -70,10 +72,12 @@ export function Shell({ children }: { children: ReactNode }) {
       <main className="flex-1 md:pl-64 pb-20 md:pb-0">
         {/* Mobile Header */}
         <header className="md:hidden sticky top-0 z-40 glass-panel px-4 py-4 flex items-center justify-center">
-          <h1 className="text-xl font-serif font-bold text-primary tracking-tight flex items-center gap-2">
-            <Castle className="w-6 h-6 text-primary" />
-            <span>Hindavi</span>
-          </h1>
+          <Link href="/">
+            <h1 className="text-xl font-serif font-bold text-primary tracking-tight flex items-center gap-2 hover:opacity-80 transition-opacity">
+              <Castle className="w-6 h-6 text-primary" />
+              <span>Hindavi</span>
+            </h1>
+          </Link>
         </header>
         
         <div className="max-w-7xl mx-auto p-4 md:p-8">

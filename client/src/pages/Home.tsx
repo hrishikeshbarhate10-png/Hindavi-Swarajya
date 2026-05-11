@@ -1,15 +1,29 @@
 import { Link } from "wouter";
-import { Search, Map, ArrowRight, Sword, Trophy, Play } from "lucide-react";
+import { Search, Map, ArrowRight, Sword, Trophy, Play, X } from "lucide-react";
 import { useForts } from "@/hooks/use-forts";
 import { FortCard } from "@/components/ui/FortCard";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useStories } from "@/hooks/use-stories";
 import { useDailyQuiz } from "@/hooks/use-quiz";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
+type Story = {
+  id: number;
+  title: string;
+  description: string;
+  content: string;
+  imageUrl: string | null;
+};
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -18,6 +32,7 @@ export default function Home() {
   const { data: quiz } = useDailyQuiz();
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [showResult, setShowResult] = useState(false);
+  const [selectedStory, setSelectedStory] = useState<Story | null>(null);
 
   const featuredForts = forts?.slice(0, 3) || [];
   const sahyadriForts = forts?.filter(f => f.region.toLowerCase().includes('sahyadri')).slice(0, 4) || [];
@@ -80,7 +95,12 @@ export default function Home() {
           </div>
           <div className="grid gap-4">
             {stories?.map((story) => (
-              <Card key={story.id} className="overflow-hidden hover-elevate group">
+              <Card
+                key={story.id}
+                className="overflow-hidden hover-elevate group cursor-pointer"
+                onClick={() => setSelectedStory(story as Story)}
+                data-testid={`card-story-${story.id}`}
+              >
                 <div className="flex h-32">
                   <div className="w-1/3 relative">
                     <img src={story.imageUrl || ""} alt={story.title} className="absolute inset-0 w-full h-full object-cover" />
@@ -90,7 +110,7 @@ export default function Home() {
                       <h3 className="font-bold text-lg">{story.title}</h3>
                       <p className="text-sm text-muted-foreground line-clamp-2">{story.description}</p>
                     </div>
-                    <Button variant="link" className="p-0 h-auto self-start text-primary">
+                    <Button variant="link" className="p-0 h-auto self-start text-primary" tabIndex={-1}>
                       Read Story <ArrowRight className="ml-1 w-4 h-4" />
                     </Button>
                   </div>
@@ -229,6 +249,35 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Battle Story Dialog */}
+      <Dialog open={!!selectedStory} onOpenChange={(open) => { if (!open) setSelectedStory(null); }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          {selectedStory && (
+            <>
+              {selectedStory.imageUrl && (
+                <div className="relative h-56 -mx-6 -mt-6 mb-6 rounded-t-lg overflow-hidden">
+                  <img
+                    src={selectedStory.imageUrl}
+                    alt={selectedStory.title}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                </div>
+              )}
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-serif font-bold text-foreground">
+                  {selectedStory.title}
+                </DialogTitle>
+                <p className="text-muted-foreground text-sm mt-1">{selectedStory.description}</p>
+              </DialogHeader>
+              <div className="mt-4 text-foreground leading-relaxed whitespace-pre-line">
+                {selectedStory.content}
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
