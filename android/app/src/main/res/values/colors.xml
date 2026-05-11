@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary saffron — matches PWA theme_color #FF6B00 -->
+    <color name="colorPrimary">#FF6B00</color>
+    <!-- Darker saffron for Android status bar -->
+    <color name="colorPrimaryDark">#CC5500</color>
+    <!-- Accent uses the same saffron family -->
+    <color name="colorAccent">#FF8C00</color>
+    <!-- Splash / background off-white — matches PWA background_color #F5F1E6 -->
+    <color name="colorBackground">#F5F1E6</color>
+</resources>
