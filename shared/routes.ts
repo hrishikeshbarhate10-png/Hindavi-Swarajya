@@ -50,6 +50,14 @@ export const api = {
         200: z.array(z.custom<typeof artifacts.$inferSelect>()),
       },
     },
+    get: {
+      method: 'GET' as const,
+      path: '/api/artifacts/:id' as const,
+      responses: {
+        200: z.custom<typeof artifacts.$inferSelect>(),
+        404: errorSchemas.notFound,
+      },
+    },
   },
   timeline: {
     list: {
@@ -66,6 +74,14 @@ export const api = {
       path: '/api/stories' as const,
       responses: {
         200: z.array(z.custom<any>()), // BattleStory
+      },
+    },
+    get: {
+      method: 'GET' as const,
+      path: '/api/stories/:id' as const,
+      responses: {
+        200: z.custom<any>(), // BattleStory
+        404: errorSchemas.notFound,
       },
     },
   },

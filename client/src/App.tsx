@@ -14,6 +14,9 @@ import Home from "@/pages/Home";
 import Forts from "@/pages/Forts";
 import FortDetail from "@/pages/FortDetail";
 import Artifacts from "@/pages/Artifacts";
+import ArtifactDetail from "@/pages/ArtifactDetail";
+import Stories from "@/pages/Stories";
+import StoryDetail from "@/pages/StoryDetail";
 import Timeline from "@/pages/Timeline";
 import Favorites from "@/pages/Favorites";
 
@@ -25,6 +28,9 @@ function Router() {
         <Route path="/forts" component={Forts} />
         <Route path="/forts/:id" component={FortDetail} />
         <Route path="/artifacts" component={Artifacts} />
+        <Route path="/artifacts/:id" component={ArtifactDetail} />
+        <Route path="/stories" component={Stories} />
+        <Route path="/stories/:id" component={StoryDetail} />
         <Route path="/timeline" component={Timeline} />
         <Route path="/favorites" component={Favorites} />
         <Route component={NotFound} />

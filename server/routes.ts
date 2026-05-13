@@ -31,6 +31,14 @@ export async function registerRoutes(
     res.json(results);
   });
 
+  app.get(api.artifacts.get.path, async (req, res) => {
+    const id = Number(req.params.id);
+    if (isNaN(id)) return res.status(404).json({ message: "Invalid ID" });
+    const artifact = await storage.getArtifact(id);
+    if (!artifact) return res.status(404).json({ message: "Artifact not found" });
+    res.json(artifact);
+  });
+
   app.get(api.timeline.list.path, async (req, res) => {
     const results = await storage.getTimelineEvents();
     res.json(results);
@@ -39,6 +47,14 @@ export async function registerRoutes(
   app.get(api.stories.list.path, async (req, res) => {
     const results = await storage.getBattleStories();
     res.json(results);
+  });
+
+  app.get(api.stories.get.path, async (req, res) => {
+    const id = Number(req.params.id);
+    if (isNaN(id)) return res.status(404).json({ message: "Invalid ID" });
+    const story = await storage.getBattleStory(id);
+    if (!story) return res.status(404).json({ message: "Story not found" });
+    res.json(story);
   });
 
   app.get(api.quiz.daily.path, async (req, res) => {

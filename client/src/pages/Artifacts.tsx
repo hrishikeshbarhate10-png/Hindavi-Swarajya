@@ -1,4 +1,5 @@
 import { Search } from "lucide-react";
+import { Link } from "wouter";
 import { useArtifacts } from "@/hooks/use-artifacts";
 import { useState } from "react";
 import { motion } from "framer-motion";
@@ -55,27 +56,30 @@ export default function Artifacts() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.05 }}
-              className="group bg-card rounded-2xl overflow-hidden border shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col"
             >
-              <div className="relative h-48 bg-muted p-4 flex items-center justify-center overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-tr from-black/40 to-transparent z-10" />
-                <img 
-                  src={artifact.imageUrl} 
-                  alt={artifact.name}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                />
-              </div>
-              <div className="p-5 flex-1 flex flex-col">
-                <h3 className="text-xl font-serif font-bold mb-2 group-hover:text-primary transition-colors">{artifact.name}</h3>
-                <p className="text-sm text-muted-foreground line-clamp-3 mb-4 flex-1">
-                  {artifact.historicalUsage}
-                </p>
-                {artifact.fortId && (
-                  <div className="mt-auto pt-4 border-t text-xs font-semibold text-secondary uppercase tracking-wider">
-                    Associated with a Fort
+              <Link href={`/artifacts/${artifact.id}`} data-testid={`card-artifact-${artifact.id}`}>
+                <div className="group bg-card rounded-2xl overflow-hidden border shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col cursor-pointer h-full">
+                  <div className="relative h-48 bg-muted flex items-center justify-center overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-tr from-black/40 to-transparent z-10" />
+                    <img 
+                      src={artifact.imageUrl} 
+                      alt={artifact.name}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                    />
                   </div>
-                )}
-              </div>
+                  <div className="p-5 flex-1 flex flex-col">
+                    <h3 className="text-xl font-serif font-bold mb-2 group-hover:text-primary transition-colors">{artifact.name}</h3>
+                    <p className="text-sm text-muted-foreground line-clamp-3 mb-4 flex-1">
+                      {artifact.historicalUsage}
+                    </p>
+                    {artifact.fortId && (
+                      <div className="mt-auto pt-4 border-t text-xs font-semibold text-secondary uppercase tracking-wider">
+                        Associated with a Fort
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </Link>
             </motion.div>
           ))}
         </div>

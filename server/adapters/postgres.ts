@@ -40,6 +40,11 @@ export class PostgresAdapter implements IStorage {
     return await this.db.select().from(artifacts);
   }
 
+  async getArtifact(id: number): Promise<Artifact | undefined> {
+    const [artifact] = await this.db.select().from(artifacts).where(eq(artifacts.id, id));
+    return artifact;
+  }
+
   async getTimelineEvents(): Promise<TimelineEvent[]> {
     return await this.db.select().from(timelineEvents).orderBy(timelineEvents.year);
   }
@@ -48,8 +53,22 @@ export class PostgresAdapter implements IStorage {
     return await this.db.select().from(battleStories);
   }
 
+  async getBattleStory(id: number): Promise<BattleStory | undefined> {
+    const [story] = await this.db.select().from(battleStories).where(eq(battleStories.id, id));
+    return story;
+  }
+
   async getDailyQuiz(): Promise<QuizQuestion | undefined> {
-    const [quiz] = await this.db.select().from(quizQuestions).orderBy(sql`RANDOM()`).limit(1);
+    const countResult = await this.db.select({ count: sql<number>`count(*)` }).from(quizQuestions);
+    const total = Number(countResult[0]?.count ?? 0);
+    if (total === 0) return undefined;
+
+    const now = new Date();
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+    const dayOfYear = Math.floor((now.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24));
+    const offset = dayOfYear % total;
+
+    const [quiz] = await this.db.select().from(quizQuestions).offset(offset).limit(1);
     return quiz;
   }
 }

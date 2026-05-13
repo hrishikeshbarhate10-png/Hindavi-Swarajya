@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
-import { Home, Castle, Sword, Clock, Heart } from "lucide-react";
+import { Home, Castle, Sword, Clock, Heart, BookOpen } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { useFavorites } from "@/hooks/use-favorites";
@@ -12,6 +12,7 @@ function cn(...inputs: ClassValue[]) {
 const navItems = [
   { href: "/", label: "Explore", icon: Home },
   { href: "/forts", label: "Forts", icon: Castle },
+  { href: "/stories", label: "Stories", icon: BookOpen },
   { href: "/artifacts", label: "Artifacts", icon: Sword },
   { href: "/timeline", label: "Timeline", icon: Clock },
   { href: "/favorites", label: "Saved", icon: Heart, showBadge: true },

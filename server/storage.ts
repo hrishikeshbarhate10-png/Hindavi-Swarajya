@@ -12,8 +12,10 @@ export interface IStorage {
   getForts(search?: string, region?: string): Promise<Fort[]>;
   getFort(id: number): Promise<(Fort & { images: FortImage[] }) | undefined>;
   getArtifacts(): Promise<Artifact[]>;
+  getArtifact(id: number): Promise<Artifact | undefined>;
   getTimelineEvents(): Promise<TimelineEvent[]>;
   getBattleStories(): Promise<BattleStory[]>;
+  getBattleStory(id: number): Promise<BattleStory | undefined>;
   getDailyQuiz(): Promise<QuizQuestion | undefined>;
 }
 

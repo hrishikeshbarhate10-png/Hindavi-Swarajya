@@ -1,8 +1,8 @@
 import { Link } from "wouter";
-import { Search, Map, ArrowRight, Sword, Trophy, Play, X } from "lucide-react";
+import { Search, Map, ArrowRight, BookOpen, Trophy, Play, CheckCircle2, XCircle, CalendarClock } from "lucide-react";
 import { useForts } from "@/hooks/use-forts";
 import { FortCard } from "@/components/ui/FortCard";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useStories } from "@/hooks/use-stories";
 import { useDailyQuiz } from "@/hooks/use-quiz";
@@ -10,19 +10,17 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 
-type Story = {
-  id: number;
-  title: string;
-  description: string;
-  content: string;
-  imageUrl: string | null;
+const QUIZ_STORAGE_KEY = "hindavi_quiz_";
+
+function getTodayKey() {
+  const d = new Date();
+  return `${QUIZ_STORAGE_KEY}${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+}
+
+type SavedQuizState = {
+  answeredOption: string;
+  correct: boolean;
 };
 
 export default function Home() {
@@ -30,9 +28,24 @@ export default function Home() {
   const { data: forts, isLoading } = useForts();
   const { data: stories } = useStories();
   const { data: quiz } = useDailyQuiz();
+
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
-  const [showResult, setShowResult] = useState(false);
-  const [selectedStory, setSelectedStory] = useState<Story | null>(null);
+  const [savedResult, setSavedResult] = useState<SavedQuizState | null>(null);
+
+  useEffect(() => {
+    const stored = localStorage.getItem(getTodayKey());
+    if (stored) {
+      try { setSavedResult(JSON.parse(stored)); } catch {}
+    }
+  }, []);
+
+  function handleSubmitQuiz() {
+    if (!selectedOption || !quiz) return;
+    const correct = selectedOption === quiz.correctAnswer;
+    const result: SavedQuizState = { answeredOption: selectedOption, correct };
+    localStorage.setItem(getTodayKey(), JSON.stringify(result));
+    setSavedResult(result);
+  }
 
   const featuredForts = forts?.slice(0, 3) || [];
   const sahyadriForts = forts?.filter(f => f.region.toLowerCase().includes('sahyadri')).slice(0, 4) || [];
@@ -41,14 +54,13 @@ export default function Home() {
     <div className="space-y-12 pb-12">
       {/* Hero Section */}
       <section className="relative rounded-3xl overflow-hidden shadow-2xl h-[60vh] min-h-[400px]">
-        {/* landscape scenic mountain fort unspash image */}
-        <img 
-          src="https://pixabay.com/get/gbf0db9ea114caf3240ef1467a7662f095923434e73181d483d4bdadd58475b361b674a2cdea70ceb2dfa2f7b284dbcf825338d43696c1218b8a8f3a900906914_1280.jpg" 
-          alt="Majestic mountain fort" 
+        <img
+          src="https://pixabay.com/get/gbf0db9ea114caf3240ef1467a7662f095923434e73181d483d4bdadd58475b361b674a2cdea70ceb2dfa2f7b284dbcf825338d43696c1218b8a8f3a900906914_1280.jpg"
+          alt="Majestic mountain fort"
           className="absolute inset-0 w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/50 to-black/90" />
-        
+
         <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -61,20 +73,21 @@ export default function Home() {
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif font-bold text-white mb-6 drop-shadow-lg text-balance max-w-4xl">
               Explore the Invincible Forts of Marathas
             </h1>
-            
+
             {/* Search Bar */}
             <div className="w-full max-w-md mx-auto mt-8 relative">
               <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
                 <Search className="w-5 h-5 text-muted-foreground" />
               </div>
-              <input 
-                type="text" 
-                placeholder="Search forts, regions..." 
+              <input
+                type="text"
+                placeholder="Search forts, regions..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                data-testid="input-search-forts"
                 className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/95 backdrop-blur-sm border-0 text-foreground placeholder:text-muted-foreground focus:ring-4 focus:ring-primary/30 shadow-xl transition-all"
               />
-              <Link 
+              <Link
                 href={searchQuery ? `/forts?search=${encodeURIComponent(searchQuery)}` : `/forts`}
                 className="absolute inset-y-2 right-2 px-6 bg-primary text-primary-foreground rounded-xl font-medium flex items-center hover:bg-primary/90 transition-colors shadow-md"
               >
@@ -89,33 +102,48 @@ export default function Home() {
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Battle Stories */}
         <div className="space-y-6">
-          <div className="flex items-center gap-3">
-            <Sword className="w-6 h-6 text-primary" />
-            <h2 className="text-3xl font-serif font-bold">Battle Stories</h2>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <BookOpen className="w-6 h-6 text-primary" />
+              <h2 className="text-3xl font-serif font-bold">Battle Stories</h2>
+            </div>
+            <Link href="/stories" className="flex items-center gap-1 text-primary font-medium text-sm hover:text-primary/80 transition-colors group">
+              View All <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </Link>
           </div>
           <div className="grid gap-4">
-            {stories?.map((story) => (
-              <Card
-                key={story.id}
-                className="overflow-hidden hover-elevate group cursor-pointer"
-                onClick={() => setSelectedStory(story as Story)}
-                data-testid={`card-story-${story.id}`}
-              >
-                <div className="flex h-32">
-                  <div className="w-1/3 relative">
-                    <img src={story.imageUrl || ""} alt={story.title} className="absolute inset-0 w-full h-full object-cover" />
-                  </div>
-                  <div className="w-2/3 p-4 flex flex-col justify-between">
-                    <div>
-                      <h3 className="font-bold text-lg">{story.title}</h3>
-                      <p className="text-sm text-muted-foreground line-clamp-2">{story.description}</p>
+            {stories?.slice(0, 3).map((story) => (
+              <Link key={story.id} href={`/stories/${story.id}`}>
+                <Card
+                  className="overflow-hidden hover-elevate group cursor-pointer"
+                  data-testid={`card-story-${story.id}`}
+                >
+                  <div className="flex h-32">
+                    <div className="w-1/3 relative flex-shrink-0">
+                      {story.imageUrl ? (
+                        <img
+                          src={story.imageUrl}
+                          alt={story.title}
+                          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 bg-primary/10 flex items-center justify-center">
+                          <BookOpen className="w-8 h-8 text-primary/30" />
+                        </div>
+                      )}
                     </div>
-                    <Button variant="link" className="p-0 h-auto self-start text-primary" tabIndex={-1}>
-                      Read Story <ArrowRight className="ml-1 w-4 h-4" />
-                    </Button>
+                    <div className="flex-1 p-4 flex flex-col justify-between">
+                      <div>
+                        <h3 className="font-bold text-lg group-hover:text-primary transition-colors leading-snug">{story.title}</h3>
+                        <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{story.description}</p>
+                      </div>
+                      <span className="inline-flex items-center gap-1 text-primary text-sm font-medium">
+                        Read Story <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                      </span>
+                    </div>
                   </div>
-                </div>
-              </Card>
+                </Card>
+              </Link>
             ))}
           </div>
         </div>
@@ -126,44 +154,58 @@ export default function Home() {
             <Trophy className="w-6 h-6 text-primary" />
             <h2 className="text-3xl font-serif font-bold">Quiz of the Day</h2>
           </div>
+
           {quiz && (
             <Card className="p-6 border-2 border-primary/20 bg-primary/5">
-              <h3 className="text-xl font-bold mb-4">{quiz.question}</h3>
-              {!showResult ? (
+              <h3 className="text-xl font-bold mb-4" data-testid="text-quiz-question">{quiz.question}</h3>
+
+              {!savedResult ? (
+                /* Unanswered state */
                 <div className="space-y-4">
                   <RadioGroup onValueChange={setSelectedOption} value={selectedOption || ""}>
                     {quiz.options.map((option) => (
                       <div key={option} className="flex items-center space-x-2 bg-background p-3 rounded-lg border">
-                        <RadioGroupItem value={option} id={option} />
+                        <RadioGroupItem value={option} id={option} data-testid={`radio-quiz-${option}`} />
                         <Label htmlFor={option} className="flex-1 cursor-pointer">{option}</Label>
                       </div>
                     ))}
                   </RadioGroup>
-                  <Button 
-                    className="w-full" 
+                  <Button
+                    className="w-full"
                     disabled={!selectedOption}
-                    onClick={() => setShowResult(true)}
+                    onClick={handleSubmitQuiz}
+                    data-testid="button-submit-quiz"
                   >
                     Submit Answer
                   </Button>
                 </div>
               ) : (
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0.9 }}
+                /* Answered — locked for the day */
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="text-center space-y-4"
+                  className="space-y-4"
                 >
-                  <div className={`p-4 rounded-xl ${selectedOption === quiz.correctAnswer ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                    {selectedOption === quiz.correctAnswer ? (
-                      <p className="font-bold">Correct! Jai Bhavani!</p>
-                    ) : (
-                      <p className="font-bold">Incorrect. The correct answer is {quiz.correctAnswer}.</p>
-                    )}
+                  <div className={`p-4 rounded-xl flex items-start gap-3 ${savedResult.correct ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'}`}>
+                    {savedResult.correct
+                      ? <CheckCircle2 className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                      : <XCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />}
+                    <div>
+                      <p className="font-bold">
+                        {savedResult.correct ? "Correct! Jai Bhavani!" : `Incorrect. The answer is ${quiz.correctAnswer}.`}
+                      </p>
+                      <p className="text-sm mt-1">Your answer: {savedResult.answeredOption}</p>
+                    </div>
                   </div>
-                  <p className="text-muted-foreground">{quiz.explanation}</p>
-                  <Button variant="outline" onClick={() => { setShowResult(false); setSelectedOption(null); }}>
-                    Try Another
-                  </Button>
+
+                  {quiz.explanation && (
+                    <p className="text-muted-foreground text-sm leading-relaxed">{quiz.explanation}</p>
+                  )}
+
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground bg-background/60 rounded-xl px-4 py-3 border">
+                    <CalendarClock className="w-4 h-4 flex-shrink-0 text-primary" />
+                    Come back tomorrow for a new question!
+                  </div>
                 </motion.div>
               )}
             </Card>
@@ -192,7 +234,7 @@ export default function Home() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {featuredForts.map((fort, idx) => (
-              <motion.div 
+              <motion.div
                 key={fort.id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -235,7 +277,7 @@ export default function Home() {
               Explore Region
             </Link>
           </div>
-          
+
           <div className="flex-1 w-full grid grid-cols-2 gap-4">
             {sahyadriForts.length > 0 ? sahyadriForts.map(fort => (
               <Link key={fort.id} href={`/forts/${fort.id}`} className="group block relative h-40 rounded-2xl overflow-hidden shadow-sm">
@@ -249,35 +291,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* Battle Story Dialog */}
-      <Dialog open={!!selectedStory} onOpenChange={(open) => { if (!open) setSelectedStory(null); }}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          {selectedStory && (
-            <>
-              {selectedStory.imageUrl && (
-                <div className="relative h-56 -mx-6 -mt-6 mb-6 rounded-t-lg overflow-hidden">
-                  <img
-                    src={selectedStory.imageUrl}
-                    alt={selectedStory.title}
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                </div>
-              )}
-              <DialogHeader>
-                <DialogTitle className="text-2xl font-serif font-bold text-foreground">
-                  {selectedStory.title}
-                </DialogTitle>
-                <p className="text-muted-foreground text-sm mt-1">{selectedStory.description}</p>
-              </DialogHeader>
-              <div className="mt-4 text-foreground leading-relaxed whitespace-pre-line">
-                {selectedStory.content}
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
