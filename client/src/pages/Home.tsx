@@ -15,7 +15,7 @@ const QUIZ_STORAGE_KEY = "hindavi_quiz_";
 
 function getTodayKey() {
   const d = new Date();
-  return `${QUIZ_STORAGE_KEY}${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+  return `${QUIZ_STORAGE_KEY}${d.getUTCFullYear()}-${d.getUTCMonth() + 1}-${d.getUTCDate()}`;
 }
 
 type SavedQuizState = {

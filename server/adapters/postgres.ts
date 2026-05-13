@@ -64,8 +64,8 @@ export class PostgresAdapter implements IStorage {
     if (total === 0) return undefined;
 
     const now = new Date();
-    const startOfYear = new Date(now.getFullYear(), 0, 1);
-    const dayOfYear = Math.floor((now.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24));
+    const startOfYear = Date.UTC(now.getUTCFullYear(), 0, 1);
+    const dayOfYear = Math.floor((now.getTime() - startOfYear) / (1000 * 60 * 60 * 24));
     const offset = dayOfYear % total;
 
     const [quiz] = await this.db.select().from(quizQuestions).orderBy(quizQuestions.id).offset(offset).limit(1);

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { forts, fortImages, artifacts, timelineEvents } from './schema';
+import { forts, fortImages, artifacts, timelineEvents, battleStories, quizQuestions } from './schema';
 
 export const errorSchemas = {
   validation: z.object({
@@ -73,14 +73,14 @@ export const api = {
       method: 'GET' as const,
       path: '/api/stories' as const,
       responses: {
-        200: z.array(z.custom<any>()), // BattleStory
+        200: z.array(z.custom<typeof battleStories.$inferSelect>()),
       },
     },
     get: {
       method: 'GET' as const,
       path: '/api/stories/:id' as const,
       responses: {
-        200: z.custom<any>(), // BattleStory
+        200: z.custom<typeof battleStories.$inferSelect>(),
         404: errorSchemas.notFound,
       },
     },
@@ -90,7 +90,7 @@ export const api = {
       method: 'GET' as const,
       path: '/api/quiz/daily' as const,
       responses: {
-        200: z.custom<any>(), // QuizQuestion
+        200: z.custom<typeof quizQuestions.$inferSelect>(),
       },
     },
   },
