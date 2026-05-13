@@ -20,7 +20,8 @@ export function useArtifact(id: number) {
     queryFn: async () => {
       const res = await fetch(`/api/artifacts/${id}`, { credentials: "include" });
       if (!res.ok) throw new Error("Artifact not found");
-      return res.json();
+      const data = await res.json();
+      return api.artifacts.get.responses[200].parse(data);
     },
     enabled: !!id,
   });

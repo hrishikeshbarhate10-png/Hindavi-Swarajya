@@ -14,7 +14,8 @@ export function useStory(id: number) {
     queryFn: async () => {
       const res = await fetch(`/api/stories/${id}`, { credentials: "include" });
       if (!res.ok) throw new Error("Story not found");
-      return res.json();
+      const data = await res.json();
+      return api.stories.get.responses[200].parse(data);
     },
     enabled: !!id,
   });
