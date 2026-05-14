@@ -1,19 +1,43 @@
 import { useRoute } from "wouter";
-import { MapPin, Calendar, Compass, ShieldAlert, Heart, ArrowLeft, Image as ImageIcon } from "lucide-react";
+import { MapPin, Calendar, Compass, ShieldAlert, Heart, ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { useFort } from "@/hooks/use-forts";
 import { useFavorites } from "@/hooks/use-favorites";
 import { AdBanner } from "@/components/ui/AdBanner";
 import { Link } from "wouter";
 import useEmblaCarousel from "embla-carousel-react";
 import { motion } from "framer-motion";
+import { useState, useEffect, useCallback } from "react";
 
 export default function FortDetail() {
   const [, params] = useRoute("/forts/:id");
   const fortId = Number(params?.id);
   const { data: fort, isLoading, error } = useFort(fortId);
   const { isFavorite, toggleFavorite } = useFavorites();
-  
-  const [emblaRef] = useEmblaCarousel({ loop: true });
+
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
+  const [thumbsRef, thumbsApi] = useEmblaCarousel({
+    containScroll: "keepSnaps",
+    dragFree: true,
+  });
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    const idx = emblaApi.selectedScrollSnap();
+    setSelectedIndex(idx);
+    thumbsApi?.scrollTo(idx);
+  }, [emblaApi, thumbsApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    onSelect();
+    emblaApi.on("select", onSelect);
+    return () => { emblaApi.off("select", onSelect); };
+  }, [emblaApi, onSelect]);
+
+  const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
+  const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
+  const scrollTo = useCallback((idx: number) => emblaApi?.scrollTo(idx), [emblaApi]);
 
   if (isLoading) {
     return (
@@ -38,8 +62,14 @@ export default function FortDetail() {
   }
 
   const favorited = isFavorite(fort.id);
-  // Default fallback image if array is empty
-  const images = fort.images?.length > 0 ? fort.images : [{ id: 0, url: fort.imageUrl }];
+
+  // Use fort_images gallery; filter out seed marker rows; fallback to main imageUrl if empty
+  const realImages = (fort.images || []).filter(img => !img.url.startsWith("__seed_version__"));
+  const galleryImages = realImages.length > 0
+    ? realImages
+    : [{ id: 0, url: fort.imageUrl }];
+
+  const hasMultiple = galleryImages.length > 1;
 
   return (
     <div className="space-y-8 pb-16">
@@ -48,13 +78,13 @@ export default function FortDetail() {
         <Link href="/forts" className="inline-flex items-center gap-2 px-4 py-2 bg-card border rounded-xl hover:bg-muted transition-colors font-medium">
           <ArrowLeft className="w-4 h-4" /> Back
         </Link>
-        
+
         <button
           onClick={() => toggleFavorite(fort.id)}
           data-testid="button-favorite-detail"
           className={`inline-flex items-center gap-2 px-5 py-2 rounded-xl font-medium transition-all shadow-sm ${
-            favorited 
-              ? "bg-primary text-primary-foreground border-transparent" 
+            favorited
+              ? "bg-primary text-primary-foreground border-transparent"
               : "bg-card border text-foreground hover:bg-muted"
           }`}
         >
@@ -86,25 +116,100 @@ export default function FortDetail() {
       </div>
 
       {/* Gallery */}
-      <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-black">
-        <div className="overflow-hidden h-[50vh] min-h-[400px]" ref={emblaRef}>
-          <div className="flex h-full">
-            {images.map((img, i) => (
-              <div key={img.id || i} className="flex-[0_0_100%] min-w-0 relative h-full">
-                <img 
-                  src={img.url} 
-                  alt={`${fort.name} - View ${i + 1}`} 
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+      <div className="space-y-3">
+        {/* Hero Slider */}
+        <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-black group">
+          <div className="overflow-hidden h-[55vh] min-h-[420px]" ref={emblaRef}>
+            <div className="flex h-full">
+              {galleryImages.map((img, i) => (
+                <div key={img.id || i} className="flex-[0_0_100%] min-w-0 relative h-full">
+                  <img
+                    src={img.url}
+                    alt={`${fort.name} - View ${i + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Prev / Next arrows */}
+          {hasMultiple && (
+            <>
+              <button
+                onClick={scrollPrev}
+                data-testid="button-gallery-prev"
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/50 hover:bg-black/75 backdrop-blur-sm text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 border border-white/20 shadow-lg"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <button
+                onClick={scrollNext}
+                data-testid="button-gallery-next"
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/50 hover:bg-black/75 backdrop-blur-sm text-white flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 border border-white/20 shadow-lg"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </>
+          )}
+
+          {/* Bottom bar: dots + counter */}
+          {hasMultiple && (
+            <div className="absolute bottom-0 left-0 right-0 px-6 pb-5 flex items-center justify-between">
+              {/* Dot indicators */}
+              <div className="flex items-center gap-1.5">
+                {galleryImages.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => scrollTo(i)}
+                    data-testid={`button-gallery-dot-${i}`}
+                    className={`rounded-full transition-all duration-300 ${
+                      i === selectedIndex
+                        ? "w-6 h-2 bg-primary"
+                        : "w-2 h-2 bg-white/50 hover:bg-white/80"
+                    }`}
+                  />
+                ))}
               </div>
-            ))}
-          </div>
+
+              {/* Photo counter */}
+              <span className="text-white/80 text-sm font-medium tabular-nums">
+                {selectedIndex + 1} / {galleryImages.length}
+              </span>
+            </div>
+          )}
         </div>
-        {images.length > 1 && (
-          <div className="absolute bottom-6 right-6 px-4 py-2 bg-black/50 backdrop-blur-md rounded-full text-white text-sm flex items-center gap-2 border border-white/20">
-            <ImageIcon className="w-4 h-4" /> {images.length} Photos
-          </div>
+
+        {/* Thumbnail Strip */}
+        {hasMultiple && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="overflow-hidden" ref={thumbsRef}
+          >
+            <div className="flex gap-2 py-1">
+              {galleryImages.map((img, i) => (
+                <button
+                  key={img.id || i}
+                  onClick={() => scrollTo(i)}
+                  data-testid={`button-thumb-${i}`}
+                  className={`flex-[0_0_80px] md:flex-[0_0_100px] h-16 rounded-xl overflow-hidden flex-shrink-0 transition-all duration-200 ${
+                    i === selectedIndex
+                      ? "ring-2 ring-primary ring-offset-2 ring-offset-background opacity-100"
+                      : "opacity-55 hover:opacity-80"
+                  }`}
+                >
+                  <img
+                    src={img.url}
+                    alt={`Thumbnail ${i + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                </button>
+              ))}
+            </div>
+          </motion.div>
         )}
       </div>
 
@@ -122,7 +227,7 @@ export default function FortDetail() {
               ))}
             </div>
           </section>
-          
+
           <section className="bg-secondary/10 rounded-3xl p-6 md:p-8 border border-secondary/20">
             <h2 className="text-2xl font-serif font-bold text-secondary-foreground dark:text-secondary mb-4 flex items-center gap-3">
               <ShieldAlert className="w-6 h-6 text-secondary" />
@@ -138,12 +243,12 @@ export default function FortDetail() {
         <div className="space-y-6">
           <div className="bg-card rounded-3xl p-6 border shadow-sm space-y-6">
             <h3 className="font-serif font-bold text-xl border-b pb-4">Visitor Information</h3>
-            
+
             <div>
               <p className="text-sm text-muted-foreground mb-1">Best Time to Visit</p>
               <p className="font-medium text-foreground">{fort.bestTime || "October to February"}</p>
             </div>
-            
+
             <div>
               <p className="text-sm text-muted-foreground mb-1">Coordinates</p>
               <p className="font-medium font-mono text-foreground">
@@ -151,7 +256,7 @@ export default function FortDetail() {
               </p>
             </div>
 
-            <a 
+            <a
               href={`https://maps.google.com/?q=${fort.latitude},${fort.longitude}`}
               target="_blank"
               rel="noopener noreferrer"
