@@ -32,7 +32,7 @@ export class PostgresAdapter implements IStorage {
   async getFort(id: number): Promise<(Fort & { images: FortImage[] }) | undefined> {
     const [fort] = await this.db.select().from(forts).where(eq(forts.id, id));
     if (!fort) return undefined;
-    const images = await this.db.select().from(fortImages).where(eq(fortImages.fortId, id));
+    const images = await this.db.select().from(fortImages).where(eq(fortImages.fortId, id)).orderBy(fortImages.id);
     return { ...fort, images };
   }
 

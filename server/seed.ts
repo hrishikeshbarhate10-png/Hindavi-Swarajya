@@ -2,7 +2,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
 import * as schema from "@shared/schema";
 import { fortImages } from "@shared/schema";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 
 function createDb() {
   const connectionString = process.env.SUPABASE_DATABASE_URL || process.env.DATABASE_URL;
@@ -13,6 +13,7 @@ function createDb() {
 }
 
 // First URL of each fort MUST exactly match the fort's main imageUrl column
+// so that image[0] === fort.imageUrl after ORDER BY id
 const FORT_IMAGES: { fortId: number; url: string }[] = [
   // Raigad Fort (id=1) — imageUrl: photo-1596489370043-424a101b0b5e
   { fortId: 1, url: "https://images.unsplash.com/photo-1596489370043-424a101b0b5e" },
@@ -34,8 +35,10 @@ const FORT_IMAGES: { fortId: number; url: string }[] = [
   { fortId: 3, url: "https://images.unsplash.com/photo-1578662996442-48f60103fc96" },
 ];
 
-// Version bump this string whenever FORT_IMAGES changes to force a re-seed on next startup
-const SEED_VERSION = "v2";
+const TARGET_FORT_IDS = [1, 2, 3];
+
+// Version bump this string to force a re-seed on next startup
+const SEED_VERSION = "v3";
 const SEED_MARKER_URL = `__seed_version__:${SEED_VERSION}`;
 
 export async function seedFortImages() {
@@ -43,7 +46,7 @@ export async function seedFortImages() {
   if (!db) return;
 
   try {
-    // Check if we already seeded this version by looking for the marker
+    // Check for current version marker (scoped to fort 1)
     const marker = await db
       .select()
       .from(fortImages)
@@ -52,12 +55,13 @@ export async function seedFortImages() {
 
     if (marker.length > 0) return; // Already seeded this version
 
-    // Clear and re-seed
-    await db.delete(fortImages);
+    // Delete only the rows belonging to the three target forts — no collateral damage
+    await db.delete(fortImages).where(inArray(fortImages.fortId, TARGET_FORT_IDS));
 
+    // Insert 5 images per fort plus a scoped version marker on fort 1
     const toInsert = [
       ...FORT_IMAGES,
-      { fortId: 1, url: SEED_MARKER_URL }, // version marker
+      { fortId: 1, url: SEED_MARKER_URL },
     ];
     await db.insert(fortImages).values(toInsert);
     console.log(`[seed] Fort images seeded (${SEED_VERSION}): ${FORT_IMAGES.length} images across 3 forts`);
