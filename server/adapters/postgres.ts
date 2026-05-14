@@ -3,7 +3,7 @@ import pg from "pg";
 import * as schema from "@shared/schema";
 import { forts, fortImages, artifacts, timelineEvents, battleStories, quizQuestions } from "@shared/schema";
 import type { Fort, FortImage, Artifact, TimelineEvent, BattleStory, QuizQuestion } from "@shared/schema";
-import { eq, ilike, or, sql, not, like } from "drizzle-orm";
+import { eq, ilike, or, sql } from "drizzle-orm";
 import type { IStorage } from "../storage";
 
 function createPostgresDb() {
