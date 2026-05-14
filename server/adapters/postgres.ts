@@ -3,7 +3,7 @@ import pg from "pg";
 import * as schema from "@shared/schema";
 import { forts, fortImages, artifacts, timelineEvents, battleStories, quizQuestions } from "@shared/schema";
 import type { Fort, FortImage, Artifact, TimelineEvent, BattleStory, QuizQuestion } from "@shared/schema";
-import { eq, ilike, or, sql } from "drizzle-orm";
+import { eq, ilike, or, sql, not, like } from "drizzle-orm";
 import type { IStorage } from "../storage";
 
 function createPostgresDb() {
@@ -32,7 +32,12 @@ export class PostgresAdapter implements IStorage {
   async getFort(id: number): Promise<(Fort & { images: FortImage[] }) | undefined> {
     const [fort] = await this.db.select().from(forts).where(eq(forts.id, id));
     if (!fort) return undefined;
-    const images = await this.db.select().from(fortImages).where(eq(fortImages.fortId, id)).orderBy(fortImages.id);
+    const images = await this.db
+      .select()
+      .from(fortImages)
+      .where(eq(fortImages.fortId, id))
+      .orderBy(fortImages.id)
+      .then(rows => rows.filter(r => !r.url.startsWith("__seed_version__")));
     return { ...fort, images };
   }
 

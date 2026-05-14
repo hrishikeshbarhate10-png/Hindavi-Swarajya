@@ -63,10 +63,9 @@ export default function FortDetail() {
 
   const favorited = isFavorite(fort.id);
 
-  // Use fort_images gallery; filter out seed marker rows; fallback to main imageUrl if empty
-  const realImages = (fort.images || []).filter(img => !img.url.startsWith("__seed_version__"));
-  const galleryImages = realImages.length > 0
-    ? realImages
+  // Use fort_images gallery; fallback to main imageUrl if empty
+  const galleryImages = (fort.images || []).length > 0
+    ? fort.images!
     : [{ id: 0, url: fort.imageUrl }];
 
   const hasMultiple = galleryImages.length > 1;
